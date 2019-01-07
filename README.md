@@ -5,4 +5,4 @@ Google Calendar
 Introduction
 ------------
 * Using Google Calendar api 
-* mvc,mvp and mvvm  are gradually refactoring.
+* Android Pattern refactoring
