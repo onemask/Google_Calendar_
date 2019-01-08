@@ -75,11 +75,11 @@ class MainActivity : AppCompatActivity() {
         isGooglePlayServiceAvailable()
 
         button_holiday.setOnClickListener {
-                getCalendarList()
+            getCalendarList()
         }
 
         button_month.setOnClickListener {
-                getPirvateList(calendarId)
+            getPirvateList(calendarId)
         }
 
 
@@ -92,12 +92,12 @@ class MainActivity : AppCompatActivity() {
             .subscribe({
                 it.forEach { item ->
                     val button = Button(this)
-                    button.text=item.summary
+                    button.text = item.summary
                     button.setOnClickListener {
                         getEventList(item.id)
                     }
                     layout_button.addView(button)
-                    Log.d("지금 나오는 item.id",item.id)
+                    Log.d("지금 나오는 item.id", item.id)
                 }
             }, {
                 when (it) {
@@ -156,7 +156,7 @@ class MainActivity : AppCompatActivity() {
         } else {
             googleAccountCredential.selectedAccountName?.let {
                 //getCalendarList()
-                REQUEST_ACCOUNT=googleAccountCredential.selectedAccountName
+                REQUEST_ACCOUNT = googleAccountCredential.selectedAccountName
             }.let {
                 //choseAccount()
             }
@@ -216,9 +216,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-
-        val accountName = AccountManager.KEY_ACCOUNT_NAME
-
         when (requestCode) {
             REQUEST_CODE_PLAY_SERVICE -> {
                 if (resultCode == Activity.RESULT_OK) {
@@ -228,18 +225,14 @@ class MainActivity : AppCompatActivity() {
             }
             REQUEST_ACCOUNT_PICKER -> {
                 if (resultCode == Activity.RESULT_OK) {
-                    val accountName: String = data!!.getStringExtra(accountName)
+                    val accountName: String? = data?.getStringExtra(AccountManager.KEY_ACCOUNT_NAME)
                     accountName?.let {
-                        val setting = getPreferences(Context.MODE_PRIVATE)
-                        val edittor: SharedPreferences.Editor =
-                            setting.edit().putString(REQUEST_ACCOUNT, accountName).apply {
-                                googleAccountCredential.setSelectedAccountName(accountName)?.let {
-                                    getResultFromApi()
-                                    apply()
-                                }
-                            }
-                    }.let {
-                        return@let
+                        getPreferences(Context.MODE_PRIVATE).edit().apply {
+                            putString(REQUEST_ACCOUNT, accountName)
+                            getResultFromApi()
+                            apply()
+                        }
+                        googleAccountCredential.selectedAccountName = accountName
                     }
                 }
             }
@@ -254,10 +247,7 @@ class MainActivity : AppCompatActivity() {
 
         }
     }
-
-
 }
-
 
 
 
