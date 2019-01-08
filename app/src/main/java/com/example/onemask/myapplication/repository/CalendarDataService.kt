@@ -15,8 +15,10 @@ class CalendarDataService constructor(
     jacksonFactory: JacksonFactory,
     googleAccountCredential : GoogleAccountCredential
 ) : CalendarService {
+
     private val calendar: Calendar = Calendar.Builder(httptransport, jacksonFactory, googleAccountCredential)
-        .setApplicationName("Google Calendar ").build()
+        .setApplicationName("Google Calendar ")
+        .build()
 
     override fun getCalendarList(): Single<CalendarList> {
         return Single.fromCallable { calendar.CalendarList().list().execute() }

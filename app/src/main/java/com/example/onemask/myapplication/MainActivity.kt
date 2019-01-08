@@ -9,6 +9,7 @@ import android.content.SharedPreferences
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
+import android.view.View
 import android.widget.Button
 import android.widget.Toast
 import com.example.onemask.myapplication.repository.CalendarDataService
@@ -37,6 +38,7 @@ private const val REQUEST_ACCOUNT_PICKER = 1003
 private const val REQUEST_AUTHORIZATION = 1004
 private const val RC_AUTH_PERMISSION = 1005
 
+
 class MainActivity : AppCompatActivity() {
 
     private lateinit var googleAccountCredential: GoogleAccountCredential
@@ -44,58 +46,67 @@ class MainActivity : AppCompatActivity() {
     private lateinit var googleCalendarRepository: CalendarRepository
     private lateinit var calendarDataService: CalendarDataService
 
-    private val REQUEST_ACCOUNT: String = "accountName"
+    private var REQUEST_ACCOUNT: String = "accountName"
     private var calendarId: String = "onemask14@gmail.com"
+    private var isgoogle: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        getAuth()
-        makeObject()
 
-        add_calendar.setOnClickListener {
-            getEventList(calendarId)
+        button_auth.setOnClickListener {
+            getAuth()
         }
+
     }
 
-    fun getAuth(){
+    fun getAuth() {
+        val httptransport: HttpTransport = AndroidHttp.newCompatibleTransport()
+        val jsonFactory: JacksonFactory = JacksonFactory.getDefaultInstance()
         //구글 인증 관련.
         compositeDisposable = CompositeDisposable()
         googleAccountCredential = GoogleAccountCredential.usingOAuth2(
             applicationContext, Arrays.asList(CalendarScopes.CALENDAR)
         ).setBackOff(ExponentialBackOff())
-    }
 
-    fun makeObject() {
-        val httptransport: HttpTransport = AndroidHttp.newCompatibleTransport()
-        val jsonFactory: JacksonFactory = JacksonFactory.getDefaultInstance()
         calendarDataService = CalendarDataService(httptransport, jsonFactory, googleAccountCredential)
         googleCalendarRepository = CalendarRepository(calendarDataService)
 
-    }
+        isGooglePlayServiceAvailable()
 
-    private fun CalendarList() {
-        if (isGooglePlayServiceAvailable()) {
-            googleCalendarRepository.getCalendarList()
-                .observeOn(AndroidSchedulers.mainThread())
-                .map { it.items }
-                .subscribe({
-                    it.forEach { item ->
-                        val button = Button(this)
-                        text_field.text = item.summary
-                        add_calendar.setOnClickListener {
-                            getEventList(item.id)
-                        }
-                    }
-                }, {
-                    when (it) {
-                        is UserRecoverableAuthIOException -> startActivityForResult(it.intent, RC_AUTH_PERMISSION)
-                        else -> it.printStackTrace()
-                    }
-                }).apply { compositeDisposable.add(this) }
+        button_holiday.setOnClickListener {
+                getCalendarList()
         }
+
+        button_month.setOnClickListener {
+                getPirvateList(calendarId)
+        }
+
+
     }
 
+    private fun getCalendarList() {
+        googleCalendarRepository.getCalendarList()
+            .observeOn(AndroidSchedulers.mainThread())
+            .map { it.items }
+            .subscribe({
+                it.forEach { item ->
+                    val button = Button(this)
+                    button.text=item.summary
+                    button.setOnClickListener {
+                        getEventList(item.id)
+                    }
+                    layout_button.addView(button)
+                    Log.d("지금 나오는 item.id",item.id)
+                }
+            }, {
+                when (it) {
+                    is UserRecoverableAuthIOException -> startActivityForResult(it.intent, RC_AUTH_PERMISSION)
+                    else -> it.printStackTrace()
+                }
+            }).apply { compositeDisposable.add(this) }
+
+    }
 
     private fun getEventList(calendarId: String) {
         if (isGooglePlayServiceAvailable()) {
@@ -117,13 +128,35 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun getPirvateList(calendarId: String) {
+        if (isGooglePlayServiceAvailable()) {
+            googleCalendarRepository.getEventList(calendarId)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe({
+                    text_field.text = it.fold("") { acc, event ->
+                        acc + "startdate ${event.start.date} enddate=${event.end.date} summary=${event.summary}\n"
+                        //acc + "date=${event.start.date} summary=${event.summary}\n"
+                    }
+                }, {
+                    when (it) {
+                        is UserRecoverableAuthIOException -> startActivityForResult(it.intent, RC_AUTH_PERMISSION)
+                        else -> it.printStackTrace()
+                    }
+                })
+                .apply {
+                    compositeDisposable.add(this)
+                }
+        }
+    }
+
+
     private fun getResultFromApi() {
-        //google play service 이용 불가능
         if (!isGooglePlayServiceAvailable()) {
             acquireGooglePlayServices()
         } else {
             googleAccountCredential.selectedAccountName?.let {
-                CalendarList()
+                //getCalendarList()
+                REQUEST_ACCOUNT=googleAccountCredential.selectedAccountName
             }.let {
                 //choseAccount()
             }
@@ -131,14 +164,16 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun isGooglePlayServiceAvailable(): Boolean {
-        var test: Boolean = true
-
         googleAccountCredential.selectedAccountName?.let {
-            Log.d("구글인증이 가능하다.", test.toString())
+            Toast.makeText(this, "구글 인증이 되어있습니다.", Toast.LENGTH_SHORT).show()
+            isgoogle = true
+            button_auth.visibility = View.INVISIBLE
+            button_month.visibility = View.VISIBLE
+            button_holiday.visibility = View.VISIBLE
             return true
         }.let {
-            test = false
-            Log.d("구글인증이 불가능하다.", test.toString())
+            Toast.makeText(this, "구글 인증을 선택해주세요.", Toast.LENGTH_SHORT).show()
+            isgoogle = false
             choseAccount()
             return false
         }
@@ -148,17 +183,12 @@ class MainActivity : AppCompatActivity() {
     private fun choseAccount() {
         // GET_ACCOUNTS 권한 O
         if (hasPermissions(this, android.Manifest.permission.GET_ACCOUNTS)) {
-
-            // SharedPreferences에서 저장된 Google 계정 이름을 가져온다.
             val accountName: String? = getPreferences(Context.MODE_PRIVATE).getString(REQUEST_ACCOUNT, null)
             accountName?.let {
-                // 선택된 구글 계정 이름으로 설정한다.
                 googleAccountCredential.selectedAccountName = accountName
-                CalendarList();
             }.let {
                 startActivityForResult(googleAccountCredential.newChooseAccountIntent(), REQUEST_ACCOUNT_PICKER);
             }
-
         } else {
             // 사용자에게 GET_ACCOUNTS 권한을 요구하는 다이얼로그를 보여준다.(주소록 권한 요청함)
             EasyPermissions.requestPermissions(
@@ -174,11 +204,9 @@ class MainActivity : AppCompatActivity() {
     private fun acquireGooglePlayServices() {
         val availability: GoogleApiAvailability = GoogleApiAvailability.getInstance()
         val state = availability.isGooglePlayServicesAvailable(this)
-
         if (availability.isUserResolvableError(state)) {
             showErrorDialog(state);
         }
-
     }
 
     private fun showErrorDialog(state: Int) {
@@ -202,8 +230,6 @@ class MainActivity : AppCompatActivity() {
                 if (resultCode == Activity.RESULT_OK) {
                     val accountName: String = data!!.getStringExtra(accountName)
                     accountName?.let {
-                        Log.d("나는 멍청이 ", accountName)
-
                         val setting = getPreferences(Context.MODE_PRIVATE)
                         val edittor: SharedPreferences.Editor =
                             setting.edit().putString(REQUEST_ACCOUNT, accountName).apply {
@@ -212,6 +238,8 @@ class MainActivity : AppCompatActivity() {
                                     apply()
                                 }
                             }
+                    }.let {
+                        return@let
                     }
                 }
             }
@@ -220,7 +248,7 @@ class MainActivity : AppCompatActivity() {
                     getResultFromApi()
             }
             RC_AUTH_PERMISSION -> {
-                Toast.makeText(this,"구글 인증이 필요합니다.",Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "구글 인증이 필요합니다.", Toast.LENGTH_SHORT).show()
                 getResultFromApi()
             }
 
