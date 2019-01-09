@@ -15,4 +15,5 @@ class CalendarRepository  constructor (private val remote : CalendarDataService)
     override fun getEventList(calendarId: String): Single<List<Event>> {
         return remote.getEventList(calendarId)
     }
+
 }

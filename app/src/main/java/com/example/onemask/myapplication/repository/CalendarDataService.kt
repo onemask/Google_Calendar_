@@ -16,6 +16,7 @@ class CalendarDataService constructor(
     googleAccountCredential : GoogleAccountCredential
 ) : CalendarService {
 
+
     private val calendar: Calendar = Calendar.Builder(httptransport, jacksonFactory, googleAccountCredential)
         .setApplicationName("Google Calendar ")
         .build()
@@ -35,6 +36,10 @@ class CalendarDataService constructor(
             .subscribeOn(Schedulers.io())
             .map { it.items }
     }
+
+
+
+
 }
 
 

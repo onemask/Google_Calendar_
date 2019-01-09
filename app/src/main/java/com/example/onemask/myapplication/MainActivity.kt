@@ -63,8 +63,10 @@ class MainActivity : AppCompatActivity() {
     fun getAuth() {
         val httptransport: HttpTransport = AndroidHttp.newCompatibleTransport()
         val jsonFactory: JacksonFactory = JacksonFactory.getDefaultInstance()
+
         //구글 인증 관련.
         compositeDisposable = CompositeDisposable()
+
         googleAccountCredential = GoogleAccountCredential.usingOAuth2(
             applicationContext, Arrays.asList(CalendarScopes.CALENDAR)
         ).setBackOff(ExponentialBackOff())
@@ -72,31 +74,36 @@ class MainActivity : AppCompatActivity() {
         calendarDataService = CalendarDataService(httptransport, jsonFactory, googleAccountCredential)
         googleCalendarRepository = CalendarRepository(calendarDataService)
 
+
         isGooglePlayServiceAvailable()
 
-        button_holiday.setOnClickListener {
+        if(isgoogle){
+            button_holiday.setOnClickListener {
                 getCalendarList()
+            }
+            button_month.setOnClickListener {
+                getEventList(calendarId)
+            }
         }
-
-        button_month.setOnClickListener {
-                getPirvateList(calendarId)
+        else{
+            acquireGooglePlayServices()
         }
-
-
     }
 
     private fun getCalendarList() {
+
         googleCalendarRepository.getCalendarList()
             .observeOn(AndroidSchedulers.mainThread())
             .map { it.items }
             .subscribe({
                 it.forEach { item ->
-                    val button = Button(this)
-                    button.text=item.summary
-                    button.setOnClickListener {
-                        getEventList(item.id)
-                    }
-                    layout_button.addView(button)
+//                    val button = Button(this)
+//                    button.text=item.summary
+//                    button.setOnClickListener {
+//                        getEventList(item.id)
+//                      }
+//                    layout_button.addView(button)
+                    getEventList(item.id)
                     Log.d("지금 나오는 item.id",item.id)
                 }
             }, {
@@ -109,7 +116,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun getEventList(calendarId: String) {
-        if (isGooglePlayServiceAvailable()) {
             googleCalendarRepository.getEventList(calendarId)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({
@@ -125,43 +131,9 @@ class MainActivity : AppCompatActivity() {
                 .apply {
                     compositeDisposable.add(this)
                 }
-        }
+
     }
 
-    private fun getPirvateList(calendarId: String) {
-        if (isGooglePlayServiceAvailable()) {
-            googleCalendarRepository.getEventList(calendarId)
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe({
-                    text_field.text = it.fold("") { acc, event ->
-                        acc + "startdate ${event.start.date} enddate=${event.end.date} summary=${event.summary}\n"
-                        //acc + "date=${event.start.date} summary=${event.summary}\n"
-                    }
-                }, {
-                    when (it) {
-                        is UserRecoverableAuthIOException -> startActivityForResult(it.intent, RC_AUTH_PERMISSION)
-                        else -> it.printStackTrace()
-                    }
-                })
-                .apply {
-                    compositeDisposable.add(this)
-                }
-        }
-    }
-
-
-    private fun getResultFromApi() {
-        if (!isGooglePlayServiceAvailable()) {
-            acquireGooglePlayServices()
-        } else {
-            googleAccountCredential.selectedAccountName?.let {
-                //getCalendarList()
-                REQUEST_ACCOUNT=googleAccountCredential.selectedAccountName
-            }.let {
-                //choseAccount()
-            }
-        }
-    }
 
     private fun isGooglePlayServiceAvailable(): Boolean {
         googleAccountCredential.selectedAccountName?.let {
@@ -216,46 +188,35 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
 
-        val accountName = AccountManager.KEY_ACCOUNT_NAME
-
-        when (requestCode) {
-            REQUEST_CODE_PLAY_SERVICE -> {
-                if (resultCode == Activity.RESULT_OK) {
+        if (resultCode == Activity.RESULT_OK) {
+            when (requestCode) {
+                REQUEST_CODE_PLAY_SERVICE -> {
                     text_field.text = "구글 플레이 서비스를 설치 해주세요."
-                } else
-                    getResultFromApi()
-            }
-            REQUEST_ACCOUNT_PICKER -> {
-                if (resultCode == Activity.RESULT_OK) {
-                    val accountName: String = data!!.getStringExtra(accountName)
+                    choseAccount()
+                }
+                REQUEST_ACCOUNT_PICKER -> {
+                    val accountName = data?.getStringExtra(AccountManager.KEY_ACCOUNT_NAME)
+
                     accountName?.let {
-                        val setting = getPreferences(Context.MODE_PRIVATE)
-                        val edittor: SharedPreferences.Editor =
-                            setting.edit().putString(REQUEST_ACCOUNT, accountName).apply {
-                                googleAccountCredential.setSelectedAccountName(accountName)?.let {
-                                    getResultFromApi()
-                                    apply()
-                                }
-                            }
+                        getPreferences(Context.MODE_PRIVATE).edit().putString(REQUEST_ACCOUNT, it).apply()
                     }.let {
-                        return@let
+                        Toast.makeText(this, "뱅글뱅글", Toast.LENGTH_SHORT).show()
+                        return choseAccount()
                     }
                 }
-            }
-            REQUEST_AUTHORIZATION -> {
-                if (requestCode == Activity.RESULT_OK)
-                    getResultFromApi()
-            }
-            RC_AUTH_PERMISSION -> {
-                Toast.makeText(this, "구글 인증이 필요합니다.", Toast.LENGTH_SHORT).show()
-                getResultFromApi()
-            }
+                REQUEST_AUTHORIZATION -> {
+                    choseAccount()
+                }
+                RC_AUTH_PERMISSION -> {
+                    Toast.makeText(this, "구글 인증이 필요합니다.", Toast.LENGTH_SHORT).show()
+                    choseAccount()
+                }
 
+            }
         }
     }
-
-
 }
 
 
