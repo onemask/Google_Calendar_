@@ -79,7 +79,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         button_month.setOnClickListener {
-            getPirvateList(calendarId)
+            getEventList(calendarId)
         }
 
 
@@ -109,7 +109,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun getEventList(calendarId: String) {
-        if (isGooglePlayServiceAvailable()) {
             googleCalendarRepository.getEventList(calendarId)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({
@@ -125,30 +124,8 @@ class MainActivity : AppCompatActivity() {
                 .apply {
                     compositeDisposable.add(this)
                 }
-        }
-    }
 
-    private fun getPirvateList(calendarId: String) {
-        if (isGooglePlayServiceAvailable()) {
-            googleCalendarRepository.getEventList(calendarId)
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe({
-                    text_field.text = it.fold("") { acc, event ->
-                        acc + "startdate ${event.start.date} enddate=${event.end.date} summary=${event.summary}\n"
-                        //acc + "date=${event.start.date} summary=${event.summary}\n"
-                    }
-                }, {
-                    when (it) {
-                        is UserRecoverableAuthIOException -> startActivityForResult(it.intent, RC_AUTH_PERMISSION)
-                        else -> it.printStackTrace()
-                    }
-                })
-                .apply {
-                    compositeDisposable.add(this)
-                }
-        }
     }
-
 
     private fun getResultFromApi() {
         if (!isGooglePlayServiceAvailable()) {
@@ -165,7 +142,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun isGooglePlayServiceAvailable(): Boolean {
         googleAccountCredential.selectedAccountName?.let {
-            Toast.makeText(this, "구글 인증이 되어있습니다.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "구글 인증이 되었습니다.", Toast.LENGTH_SHORT).show()
             isgoogle = true
             button_auth.visibility = View.INVISIBLE
             button_month.visibility = View.VISIBLE
