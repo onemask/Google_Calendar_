@@ -77,17 +77,11 @@ class MainActivity : AppCompatActivity() {
 
         isGooglePlayServiceAvailable()
 
-        if(isgoogle){
-            button_holiday.setOnClickListener {
-                getCalendarList()
-            }
-            button_month.setOnClickListener {
-                getEventList(calendarId)
-            }
+
+        button_holiday.setOnClickListener {
+            getCalendarList()
         }
-        else{
-            acquireGooglePlayServices()
-        }
+
     }
 
     private fun getCalendarList() {
@@ -97,14 +91,7 @@ class MainActivity : AppCompatActivity() {
             .map { it.items }
             .subscribe({
                 it.forEach { item ->
-//                    val button = Button(this)
-//                    button.text=item.summary
-//                    button.setOnClickListener {
-//                        getEventList(item.id)
-//                      }
-//                    layout_button.addView(button)
-                    getEventList(item.id)
-                    Log.d("지금 나오는 item.id",item.id)
+
                 }
             }, {
                 when (it) {
@@ -134,6 +121,20 @@ class MainActivity : AppCompatActivity() {
 
     }
 
+
+
+    private fun getResultFromApi() {
+        if (!isGooglePlayServiceAvailable()) {
+            acquireGooglePlayServices()
+        } else {
+            googleAccountCredential.selectedAccountName?.let {
+                //getCalendarList()
+                REQUEST_ACCOUNT = googleAccountCredential.selectedAccountName
+            }.let {
+                //choseAccount()
+            }
+        }
+    }
 
     private fun isGooglePlayServiceAvailable(): Boolean {
         googleAccountCredential.selectedAccountName?.let {
@@ -188,6 +189,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+<<<<<<< HEAD
         super.onActivityResult(requestCode, resultCode, data)
 
         if (resultCode == Activity.RESULT_OK) {
@@ -204,6 +206,23 @@ class MainActivity : AppCompatActivity() {
                     }.let {
                         Toast.makeText(this, "뱅글뱅글", Toast.LENGTH_SHORT).show()
                         return choseAccount()
+        when (requestCode) {
+            REQUEST_CODE_PLAY_SERVICE -> {
+                if (resultCode == Activity.RESULT_OK) {
+                    text_field.text = "구글 플레이 서비스를 설치 해주세요."
+                } else
+                    getResultFromApi()
+            }
+            REQUEST_ACCOUNT_PICKER -> {
+                if (resultCode == Activity.RESULT_OK) {
+                    val accountName: String? = data?.getStringExtra(AccountManager.KEY_ACCOUNT_NAME)
+                    accountName?.let {
+                        getPreferences(Context.MODE_PRIVATE).edit().apply {
+                            putString(REQUEST_ACCOUNT, accountName)
+                            getResultFromApi()
+                            apply()
+                        }
+                        googleAccountCredential.selectedAccountName = accountName
                     }
                 }
                 REQUEST_AUTHORIZATION -> {
@@ -218,7 +237,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 }
-
 
 
 
