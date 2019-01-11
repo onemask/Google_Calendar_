@@ -1,36 +1,28 @@
 package com.example.onemask.myapplication
 
+
 import android.accounts.AccountManager
 import android.app.Activity
 import android.app.Dialog
 import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.Toast
-import com.example.onemask.myapplication.repository.CalendarDataService
 import com.example.onemask.myapplication.repository.CalendarRepository
-
-
 import com.google.android.gms.common.GoogleApiAvailability
-import com.google.api.client.extensions.android.http.AndroidHttp
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential
 import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException
-import com.google.api.client.http.HttpTransport
-import com.google.api.client.json.jackson2.JacksonFactory
-import com.google.api.client.util.ExponentialBackOff
-import com.google.api.services.calendar.CalendarScopes
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.activity_main.*
 import pub.devrel.easypermissions.AfterPermissionGranted
 import pub.devrel.easypermissions.EasyPermissions
 import pub.devrel.easypermissions.EasyPermissions.hasPermissions
-import java.util.*
+import javax.inject.Inject
 
 private const val REQUEST_PERMISSION_GET_ACCOUNTS = 1001
 private const val REQUEST_CODE_PLAY_SERVICE = 1002
@@ -41,10 +33,12 @@ private const val RC_AUTH_PERMISSION = 1005
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var googleAccountCredential: GoogleAccountCredential
-    private lateinit var compositeDisposable: CompositeDisposable
+   // @Inject
+    lateinit var googleAccountCredential: GoogleAccountCredential
+   // @Inject
     private lateinit var googleCalendarRepository: CalendarRepository
-    private lateinit var calendarDataService: CalendarDataService
+
+    private lateinit var compositeDisposable: CompositeDisposable
 
     private var REQUEST_ACCOUNT: String = "accountName"
     private var calendarId: String = "onemask14@gmail.com"
@@ -54,6 +48,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        compositeDisposable = CompositeDisposable()
         button_auth.setOnClickListener {
             getAuth()
         }
@@ -61,16 +56,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun getAuth() {
-        val httptransport: HttpTransport = AndroidHttp.newCompatibleTransport()
-        val jsonFactory: JacksonFactory = JacksonFactory.getDefaultInstance()
-        //구글 인증 관련.
-        compositeDisposable = CompositeDisposable()
-        googleAccountCredential = GoogleAccountCredential.usingOAuth2(
-            applicationContext, Arrays.asList(CalendarScopes.CALENDAR)
-        ).setBackOff(ExponentialBackOff())
-
-        calendarDataService = CalendarDataService(httptransport, jsonFactory, googleAccountCredential)
-        googleCalendarRepository = CalendarRepository(calendarDataService)
 
         isGooglePlayServiceAvailable()
 
@@ -81,7 +66,6 @@ class MainActivity : AppCompatActivity() {
         button_month.setOnClickListener {
             getEventList(calendarId)
         }
-
 
     }
 
@@ -97,6 +81,7 @@ class MainActivity : AppCompatActivity() {
                         getEventList(item.id)
                     }
                     layout_button.addView(button)
+                    //scrollView2.addView(button)
                     Log.d("지금 나오는 item.id", item.id)
                 }
             }, {
@@ -144,9 +129,7 @@ class MainActivity : AppCompatActivity() {
         googleAccountCredential.selectedAccountName?.let {
             Toast.makeText(this, "구글 인증이 되었습니다.", Toast.LENGTH_SHORT).show()
             isgoogle = true
-            button_auth.visibility = View.INVISIBLE
-            button_month.visibility = View.VISIBLE
-            button_holiday.visibility = View.VISIBLE
+            changeButton()
             return true
         }.let {
             Toast.makeText(this, "구글 인증을 선택해주세요.", Toast.LENGTH_SHORT).show()
@@ -154,6 +137,12 @@ class MainActivity : AppCompatActivity() {
             choseAccount()
             return false
         }
+    }
+
+    private fun changeButton(){
+        button_auth.visibility = View.INVISIBLE
+        button_month.visibility = View.VISIBLE
+        button_holiday.visibility = View.VISIBLE
     }
 
     @AfterPermissionGranted(REQUEST_PERMISSION_GET_ACCOUNTS)

@@ -1,14 +1,11 @@
 package com.example.onemask.myapplication.repository
 
-
-
-
 import com.google.api.services.calendar.model.CalendarList
 import com.google.api.services.calendar.model.Event
 import io.reactivex.Single
+import javax.inject.Inject
 
-
-class CalendarRepository  constructor (private val remote : CalendarDataService) : CalendarService {
+class CalendarRepository @Inject constructor (private val remote : CalendarDataService) : CalendarService {
     override fun getCalendarList(): Single<CalendarList> {
         return remote.getCalendarList()
     }

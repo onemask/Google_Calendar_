@@ -8,16 +8,16 @@ import com.google.api.services.calendar.model.CalendarList
 import com.google.api.services.calendar.model.Event
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
+import javax.inject.Inject
 
-
-class CalendarDataService constructor(
+class CalendarDataService @Inject constructor(
     httptransport : HttpTransport,
     jacksonFactory: JacksonFactory,
     googleAccountCredential : GoogleAccountCredential
 ) : CalendarService {
 
     private val calendar: Calendar = Calendar.Builder(httptransport, jacksonFactory, googleAccountCredential)
-        .setApplicationName("Google Calendar ")
+        .setApplicationName("Google Calendar using by Dagger ")
         .build()
 
     override fun getCalendarList(): Single<CalendarList> {
