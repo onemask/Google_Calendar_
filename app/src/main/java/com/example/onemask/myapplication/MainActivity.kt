@@ -27,9 +27,7 @@ import pub.devrel.easypermissions.EasyPermissions.hasPermissions
 import javax.inject.Inject
 
 private const val REQUEST_PERMISSION_GET_ACCOUNTS = 1001
-private const val REQUEST_CODE_PLAY_SERVICE = 1002
 private const val REQUEST_ACCOUNT_PICKER = 1003
-private const val REQUEST_AUTHORIZATION = 1004
 private const val RC_AUTH_PERMISSION = 1005
 
 
@@ -50,28 +48,11 @@ class MainActivity : DaggerAppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
         compositeDisposable = CompositeDisposable()
         button_auth.setOnClickListener {
-            getAuth()
+            isGooglePlayServiceAvailable()
         }
-
     }
-
-    fun getAuth() {
-
-        isGooglePlayServiceAvailable()
-
-        button_holiday.setOnClickListener {
-            getCalendarList()
-        }
-
-        button_month.setOnClickListener {
-            getEventList(calendarId)
-        }
-
-    }
-
     private fun getCalendarList() {
         googleCalendarRepository.getCalendarList()
             .observeOn(AndroidSchedulers.mainThread())
@@ -115,19 +96,6 @@ class MainActivity : DaggerAppCompatActivity() {
 
     }
 
-    private fun getResultFromApi() {
-        if (!isGooglePlayServiceAvailable()) {
-            acquireGooglePlayServices()
-        } else {
-            googleAccountCredential.selectedAccountName?.let {
-                //getCalendarList()
-                REQUEST_ACCOUNT = googleAccountCredential.selectedAccountName
-            }.let {
-                //choseAccount()
-            }
-        }
-    }
-
     private fun isGooglePlayServiceAvailable(): Boolean {
         googleAccountCredential.selectedAccountName?.let {
             Toast.makeText(this, "구글 인증이 되었습니다.", Toast.LENGTH_SHORT).show()
@@ -146,6 +114,13 @@ class MainActivity : DaggerAppCompatActivity() {
         button_auth.visibility = View.INVISIBLE
         button_month.visibility = View.VISIBLE
         button_holiday.visibility = View.VISIBLE
+
+        button_holiday.setOnClickListener {
+            getCalendarList()
+        }
+        button_month.setOnClickListener {
+            getEventList(calendarId)
+        }
     }
 
     @AfterPermissionGranted(REQUEST_PERMISSION_GET_ACCOUNTS)
@@ -159,7 +134,7 @@ class MainActivity : DaggerAppCompatActivity() {
                 startActivityForResult(googleAccountCredential.newChooseAccountIntent(), REQUEST_ACCOUNT_PICKER);
             }
         } else {
-            // 사용자에게 GET_ACCOUNTS 권한을 요구하는 다이얼로그를 보여준다.(주소록 권한 요청함)
+            // 권한 요청 Dialog 요청
             EasyPermissions.requestPermissions(
                 this,
                 "구글 계정 권한이 필요합니다.",
@@ -169,51 +144,24 @@ class MainActivity : DaggerAppCompatActivity() {
         }
     }
 
-
-    private fun acquireGooglePlayServices() {
-        val availability: GoogleApiAvailability = GoogleApiAvailability.getInstance()
-        val state = availability.isGooglePlayServicesAvailable(this)
-        if (availability.isUserResolvableError(state)) {
-            showErrorDialog(state);
-        }
-    }
-
-    private fun showErrorDialog(state: Int) {
-        val availability: GoogleApiAvailability = GoogleApiAvailability.getInstance()
-        val dialog: Dialog = (availability.getErrorDialog(this, state, REQUEST_CODE_PLAY_SERVICE))
-        dialog.show()
-    }
-
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         when (requestCode) {
-            REQUEST_CODE_PLAY_SERVICE -> {
-                if (resultCode == Activity.RESULT_OK) {
-                    text_field.text = "구글 플레이 서비스를 설치 해주세요."
-                } else
-                    getResultFromApi()
-            }
             REQUEST_ACCOUNT_PICKER -> {
                 if (resultCode == Activity.RESULT_OK) {
                     val accountName: String? = data?.getStringExtra(AccountManager.KEY_ACCOUNT_NAME)
                     accountName?.let {
                         getPreferences(Context.MODE_PRIVATE).edit().apply {
                             putString(REQUEST_ACCOUNT, accountName)
-                            getResultFromApi()
                             apply()
                         }
                         googleAccountCredential.selectedAccountName = accountName
                     }
                 }
             }
-            REQUEST_AUTHORIZATION -> {
-                if (requestCode == Activity.RESULT_OK)
-                    getResultFromApi()
-            }
             RC_AUTH_PERMISSION -> {
                 Toast.makeText(this, "구글 인증이 필요합니다.", Toast.LENGTH_SHORT).show()
-                getResultFromApi()
+                isGooglePlayServiceAvailable()
             }
-
         }
     }
 }
