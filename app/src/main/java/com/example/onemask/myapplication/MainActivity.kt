@@ -16,6 +16,8 @@ import com.example.onemask.myapplication.repository.CalendarRepository
 import com.google.android.gms.common.GoogleApiAvailability
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential
 import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException
+import dagger.android.support.DaggerAppCompatActivity
+
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.activity_main.*
@@ -31,12 +33,13 @@ private const val REQUEST_AUTHORIZATION = 1004
 private const val RC_AUTH_PERMISSION = 1005
 
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : DaggerAppCompatActivity() {
 
-   // @Inject
-    lateinit var googleAccountCredential: GoogleAccountCredential
-   // @Inject
-    private lateinit var googleCalendarRepository: CalendarRepository
+    @Inject
+    lateinit var  googleAccountCredential: GoogleAccountCredential
+
+    @Inject
+    lateinit var googleCalendarRepository: CalendarRepository
 
     private lateinit var compositeDisposable: CompositeDisposable
 
