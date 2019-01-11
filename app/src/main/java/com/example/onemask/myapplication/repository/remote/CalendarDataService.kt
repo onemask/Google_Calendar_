@@ -1,5 +1,6 @@
-package com.example.onemask.myapplication.repository
+package com.example.onemask.myapplication.repository.remote
 
+import com.example.onemask.myapplication.repository.CalendarService
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential
 import com.google.api.client.http.HttpTransport
 import com.google.api.client.json.jackson2.JacksonFactory
