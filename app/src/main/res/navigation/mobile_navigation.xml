@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	xmlns:tools="http://schemas.android.com/tools"
+	android:id="@+id/mobile_navigation"
+	app:startDestination="@id/dest_auth">
+
+	<fragment
+		android:id="@+id/dest_auth"
+		android:name="com.example.onemask.myapplication.controller.auth.AuthFragment"
+		tools:layout="@layout/fragment_auth">
+		<action
+			android:id="@+id/action_dest_auth_to_dest_calendar_select"
+			app:destination="@id/dest_claendar_list" />
+	</fragment>
+
+	<fragment
+		android:id="@+id/dest_claendar_list"
+		android:name="com.example.onemask.myapplication.controller.calendar.CalendarListFragment"
+		tools:layout="@layout/fragment_calendar_list">
+
+		<action
+			android:id="@+id/action_calendar_list_to_event_list"
+			app:destination="@id/dest_event_list" />
+	</fragment>
+
+	<fragment
+		android:id="@+id/dest_event_list"
+		android:name="com.example.onemask.myapplication.controller.calendar.CalendarEventListFragment"
+		tools:layout="@layout/fragment_google_event_list">
+		<argument
+			android:name="calendarId"
+			app:argType="string"
+			android:defaultValue="ID가 없습니다."/>
+
+	</fragment>
+
+</navigation>
