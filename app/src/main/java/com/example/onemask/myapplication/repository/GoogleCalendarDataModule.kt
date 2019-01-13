@@ -12,6 +12,7 @@ import com.google.api.services.calendar.CalendarScopes
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
+import io.reactivex.disposables.CompositeDisposable
 import java.util.*
 import javax.inject.Singleton
 
@@ -49,6 +50,13 @@ abstract class GoogleCalendarDataModule {
                 jacksonfactory,
                 googleAccountCredential
             )
+        }
+
+        @JvmStatic
+        @Singleton
+        @Provides
+        fun providecompositeDisposable(): CompositeDisposable{
+            return CompositeDisposable()
         }
     }
     @Singleton
