@@ -81,7 +81,7 @@ class CalendarListFragment : DaggerFragment() {
         return button
     }
 
-    private fun moveToCalendarFragment(claendarId: String?) {
+    private fun moveToCalendarFragment(calendarId: String) {
         CalendarListFragmentDirections.actionCalendarListToEventList().apply {
             this.calendarId=calendarId
             findNavController().navigate(this)
