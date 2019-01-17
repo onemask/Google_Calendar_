@@ -17,6 +17,7 @@ class CalendarDataService @Inject constructor(
     googleAccountCredential : GoogleAccountCredential
 ) : CalendarService {
 
+
     private val calendar: Calendar = Calendar.Builder(httptransport, jacksonFactory, googleAccountCredential)
         .setApplicationName("Google Calendar using by Dagger ")
         .build()
@@ -36,6 +37,10 @@ class CalendarDataService @Inject constructor(
             .subscribeOn(Schedulers.io())
             .map { it.items }
     }
+
+
+
+
 }
 
 
