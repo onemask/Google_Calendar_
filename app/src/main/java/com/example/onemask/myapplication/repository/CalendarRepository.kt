@@ -13,4 +13,5 @@ class CalendarRepository @Inject constructor (private val remote : CalendarDataS
     override fun getEventList(calendarId: String): Single<List<Event>> {
         return remote.getEventList(calendarId)
     }
+
 }

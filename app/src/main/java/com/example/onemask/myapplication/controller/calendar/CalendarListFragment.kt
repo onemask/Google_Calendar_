@@ -9,7 +9,6 @@ import android.view.ViewGroup
 import android.widget.Button
 import androidx.navigation.fragment.findNavController
 import com.example.onemask.myapplication.R
-import com.example.onemask.myapplication.R.id.layout_calendars
 import com.example.onemask.myapplication.repository.CalendarRepository
 import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException
 import com.google.api.services.calendar.model.CalendarListEntry
@@ -33,14 +32,12 @@ class CalendarListFragment : DaggerFragment() {
         super.onCreate(savedInstanceState)
         compositeDisposable = CompositeDisposable()
     }
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         return inflater.inflate(R.layout.fragment_calendar_list, container, false)
     }
-
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
