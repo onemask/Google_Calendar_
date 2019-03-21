@@ -10,20 +10,25 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.navigation.fragment.findNavController
 import com.example.onemask.myapplication.R
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.api.client.googleapis.auth.oauth2.GoogleCredential
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential
 import dagger.android.support.DaggerFragment
 import kotlinx.android.synthetic.main.fragment_auth.*
 import javax.inject.Inject
 
 
-private const val REQUEST_PERMISSION_GET_ACCOUNTS = 1001
 private const val REQUEST_ACCOUNT_PICKER = 1002
 
 
 class AuthFragment : DaggerFragment() {
 
     lateinit var gso : GoogleSignInOptions
+    lateinit var mGoogleSignInClient: GoogleSignInClient
+    lateinit var googleCredential : GoogleCredential
 
     @Inject
     lateinit var googleAccountCredential: GoogleAccountCredential
@@ -38,23 +43,14 @@ class AuthFragment : DaggerFragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        button_auth.setOnClickListener { choseAccount() }
-    }
+        makeGoogleSignIn()
 
-    //Using EasyPermissions
-//    @AfterPermissionGranted(REQUEST_PERMISSION_GET_ACCOUNTS)
-//    private fun choseAccount() {
-//        if (hasPermissions(requireContext(), android.Manifest.permission.GET_ACCOUNTS)) {
-//            startActivityForResult(googleAccountCredential.newChooseAccountIntent(), REQUEST_ACCOUNT_PICKER)
-//        }else{
-//            EasyPermissions.requestPermissions(
-//                this,
-//                "구글 계정 권한이 필요합니다.",
-//                REQUEST_PERMISSION_GET_ACCOUNTS,
-//                android.Manifest.permission.GET_ACCOUNTS
-//            )
-//        }
-//    }
+        //Delete Easypermission
+        button_auth.setOnClickListener {
+            startActivityForResult(googleAccountCredential.newChooseAccountIntent(), REQUEST_ACCOUNT_PICKER)
+        }
+
+    }
 
     // Configure sign-in to request the user's ID, email address, and basic
     // profile. ID and basic profile are included in DEFAULT_SIGN_IN.
@@ -62,12 +58,9 @@ class AuthFragment : DaggerFragment() {
         gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_GAMES_SIGN_IN)
             .requestEmail()
             .build()
-    }
 
-    //Delete EasyPermissions
-    private fun choseAccount(){
-
-
+        // Build a GoogleSignInClient with the options specified by gso.
+        mGoogleSignInClient =GoogleSignIn.getClient(this.context!!.applicationContext,gso)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
