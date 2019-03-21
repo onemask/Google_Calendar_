@@ -21,8 +21,6 @@ buildscript {
                             google_api          : '1.23.0',
                             google_calendar_api: 'v3-rev364-1.25.0',
 
-                            //easy permission
-                            easypermissions    : '2.0.0',
 
                             //okhttp3
                             okhttp             : '3.10.0',
