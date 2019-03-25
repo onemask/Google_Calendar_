@@ -26,6 +26,9 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation projects(path :'androidx_dagger_ktx')
+
+
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$versions.kotlin"
     implementation "androidx.appcompat:appcompat:1.1.0-alpha03"
     implementation "androidx.constraintlayout:constraintlayout:$versions.constraintlayout"
