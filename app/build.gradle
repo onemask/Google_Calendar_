@@ -70,10 +70,9 @@ dependencies {
     implementation "androidx.navigation:navigation-ui-ktx:$versions.navigation"
 
 
-}
-
-configurations.all {
-    // this is a workaround for the issue:
-    // https://stackoverflow.com/questions/52521302/how-to-solve-program-type-already-present-com-google-common-util-concurrent-lis
-    exclude group: 'com.google.guava', module: 'listenablefuture'
+    configurations.all {
+        // this is a workaround for the issue:
+        // https://stackoverflow.com/questions/52521302/how-to-solve-program-type-already-present-com-google-common-util-concurrent-lis
+        exclude group: 'com.google.guava', module: 'listenablefuture'
+    }
 }
