@@ -22,27 +22,28 @@ class CalendarEventListFragment : DaggerFragment() {
     @Inject
     lateinit var calendarRepository: CalendarRepository
 
-     override fun onCreate(savedInstanceState: Bundle?) {
+    override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-         compositeDisposable= CompositeDisposable()
+        compositeDisposable = CompositeDisposable()
 
     }
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
+        inflater: LayoutInflater,
+        container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_google_event_list, container, false)
-    }
+    ): View? =
+        super.onCreateView(inflater, container, savedInstanceState)
+            ?: inflater.inflate(R.layout.fragment_google_event_list, container, false)
 
-    // TODO: Rename method, update argument and hook method into UI event
+
+
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         arguments?.let {
             val safeArgs = CalendarEventListFragmentArgs.fromBundle(it)
-            if (safeArgs.calendarId!="NO_ID")
+            if (safeArgs.calendarId != "NO_ID")
                 setupCalendarDate(safeArgs.calendarId)
         }
 
@@ -59,8 +60,8 @@ class CalendarEventListFragment : DaggerFragment() {
     }
 
     private fun getEvents(calendarId: String): Single<List<Event>> =
-    calendarRepository.getEventList(calendarId)
-        .observeOn(AndroidSchedulers.mainThread())
+        calendarRepository.getEventList(calendarId)
+            .observeOn(AndroidSchedulers.mainThread())
 
     override fun onDestroy() {
         super.onDestroy()
