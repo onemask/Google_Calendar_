@@ -37,18 +37,34 @@ class CalendarEventListFragment : DaggerFragment() {
             ?: inflater.inflate(R.layout.fragment_google_event_list, container, false)
 
 
-
-
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
+        setHasOptionsMenu(true)
         arguments?.let {
-            val safeArgs = CalendarEventListFragmentArgs.fromBundle(it)
-            if (safeArgs.calendarId != "NO_ID")
-                setupCalendarDate(safeArgs.calendarId)
+            CalendarEventListFragmentArgs.fromBundle(it).let { args ->
+                if (args.calendarId != "NO_ID")
+                //3. presenter 인터페이스 함수를 호출한다.
+                    getEvents(args.calendarId)
+            }
         }
 
     }
 
+    /**
+     * 1. view 인터페이스를 정의한다.
+     * 2. presenter 인터페이스를 정의한다.
+     */
+
+
+    // 4. callback 함수를 정의한다.
+    public fun setEvents(event: List<Event>?) {
+        event?.let {
+            text_calendar.text = createEventsText(it)
+        }
+    }
+
+    /*// todo: move method in presenter
+    // compositeDisposable
     private fun setupCalendarDate(calendarId: String) {
         getEvents(calendarId).subscribe({
             text_calendar.text = it.fold("") { acc, event ->
@@ -57,15 +73,33 @@ class CalendarEventListFragment : DaggerFragment() {
         }, {
             it.printStackTrace()
         }).apply { compositeDisposable.add(this) }
-    }
+    }*/
 
-    private fun getEvents(calendarId: String): Single<List<Event>> =
+
+
+    //todo: move method in presenter
+    private fun getEvents(calendarId: String) {
         calendarRepository.getEventList(calendarId)
             .observeOn(AndroidSchedulers.mainThread())
+            .doFinally { progress_loading?.visibility = View.GONE }
+            .subscribe({
+                setEvents(it)
+            }, {
+                it.printStackTrace()
+            }).apply { compositeDisposable.add(this) }
+    }
+
+    private fun createEventsText(events: List<Event>): String {
+        val size = events.size
+        return events.foldIndexed("") { index, acc, event ->
+            acc + "date=${event.start.date} summary=${event.summary}" + if (index == size - 1) "" else "\n"
+        }
+    }
 
     override fun onDestroy() {
+        if (!compositeDisposable.isDisposed)
+            compositeDisposable.dispose()
         super.onDestroy()
-        compositeDisposable.dispose()
     }
 
 
