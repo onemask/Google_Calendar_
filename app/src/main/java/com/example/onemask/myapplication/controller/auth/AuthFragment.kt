@@ -45,7 +45,7 @@ class AuthFragment : DaggerFragment() {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         makeGoogleSignIn()
-        initTimber()
+
         //Delete Easypermission
         button_auth.setOnClickListener {
             startActivityForResult(googleAccountCredential.newChooseAccountIntent(), REQUEST_ACCOUNT_PICKER)
@@ -58,8 +58,6 @@ class AuthFragment : DaggerFragment() {
 
     }
 
-    // Configure sign-in to request the user's ID, email address, and basic
-    // profile. ID and basic profile are included in DEFAULT_SIGN_IN.
     private fun makeGoogleSignIn(){
         gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_GAMES_SIGN_IN)
             .requestEmail()
