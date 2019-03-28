@@ -24,27 +24,33 @@ abstract class GoogleCalendarDataModule {
         @JvmStatic
         @Singleton
         @Provides
-        fun provideGoogleAccountCredential(context : Context) : GoogleAccountCredential{
+        fun provideGoogleAccountCredential(context: Context): GoogleAccountCredential {
             return GoogleAccountCredential
-                .usingOAuth2(context, Arrays.asList(CalendarScopes.CALENDAR)
-            ).setBackOff(ExponentialBackOff())
+                .usingOAuth2(context, Arrays.asList(CalendarScopes.CALENDAR))
+                .setBackOff(ExponentialBackOff())
+
         }
+
         @JvmStatic
         @Singleton
         @Provides
-        fun provideHttpTransport() : HttpTransport{
+        fun provideHttpTransport(): HttpTransport {
             return AndroidHttp.newCompatibleTransport()
         }
+
         @JvmStatic
         @Singleton
         @Provides
-        fun provideJacksonfactory() : JacksonFactory {
+        fun provideJacksonfactory(): JacksonFactory {
             return JacksonFactory.getDefaultInstance()
         }
+
         @JvmStatic
         @Singleton
         @Provides
-        fun provideCalendarDataService(httpTransport: HttpTransport, jacksonfactory:JacksonFactory , googleAccountCredential: GoogleAccountCredential) : CalendarDataService {
+        fun provideCalendarDataService(httpTransport: HttpTransport,
+                                       jacksonfactory: JacksonFactory,
+                                       googleAccountCredential: GoogleAccountCredential): CalendarDataService {
             return CalendarDataService(
                 httpTransport,
                 jacksonfactory,
@@ -55,12 +61,13 @@ abstract class GoogleCalendarDataModule {
         @JvmStatic
         @Singleton
         @Provides
-        fun providecompositeDisposable(): CompositeDisposable{
+        fun providecompositeDisposable(): CompositeDisposable {
             return CompositeDisposable()
         }
     }
+
     @Singleton
     @Binds
-    abstract fun providesGooglRepository(CalendarRepository : CalendarRepository) : CalendarService
+    abstract fun providesGooglRepository(CalendarRepository: CalendarRepository): CalendarService
 
 }
