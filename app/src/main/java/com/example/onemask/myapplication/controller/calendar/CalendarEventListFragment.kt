@@ -7,11 +7,13 @@ import android.view.ViewGroup
 import com.example.onemask.myapplication.R
 import com.example.onemask.myapplication.repository.CalendarRepository
 import com.google.api.services.calendar.model.Event
+import com.google.api.services.calendar.model.TimePeriod
 import dagger.android.support.DaggerFragment
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.fragment_google_event_list.*
+import timber.log.Timber
 import javax.inject.Inject
 
 
@@ -83,6 +85,7 @@ class CalendarEventListFragment : DaggerFragment() {
             .observeOn(AndroidSchedulers.mainThread())
             .doFinally { progress_loading?.visibility = View.GONE }
             .subscribe({
+                Timber.d("getEvents ${Thread.currentThread()}")
                 setEvents(it)
             }, {
                 it.printStackTrace()

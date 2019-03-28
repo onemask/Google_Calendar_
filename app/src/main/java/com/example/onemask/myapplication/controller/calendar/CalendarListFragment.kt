@@ -19,7 +19,7 @@ import io.reactivex.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.fragment_calendar_list.*
 import javax.inject.Inject
 
-private const val  RC_AUTH_PERMISSION = 2001
+private const val RC_AUTH_PERMISSION = 2001
 
 class CalendarListFragment : DaggerFragment() {
 
@@ -32,6 +32,7 @@ class CalendarListFragment : DaggerFragment() {
         super.onCreate(savedInstanceState)
         compositeDisposable = CompositeDisposable()
     }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -46,22 +47,22 @@ class CalendarListFragment : DaggerFragment() {
 
     private fun showCalendarButton() {
         getCalendars().subscribe({
-                layout_calendars.removeAllViews()
-                addCalendarButton(it)
-            }, {
-                when (it) {
-                    is UserRecoverableAuthIOException -> startActivityForResult(it.intent, RC_AUTH_PERMISSION)
-                    else -> it.printStackTrace()
-                }
-            }).apply {
-                compositeDisposable.add(this)
+            layout_calendars.removeAllViews()
+            addCalendarButton(it)
+        }, {
+            when (it) {
+                is UserRecoverableAuthIOException -> startActivityForResult(it.intent, RC_AUTH_PERMISSION)
+                else -> it.printStackTrace()
             }
+        }).apply {
+            compositeDisposable.add(this)
+        }
     }
 
-    private fun getCalendars() : Single<List<CalendarListEntry>> =
+    private fun getCalendars(): Single<List<CalendarListEntry>> =
         claendarRepository.getCalendarList()
-        .observeOn(AndroidSchedulers.mainThread())
-        .map { it.items }
+            .observeOn(AndroidSchedulers.mainThread())
+            .map { it.items }
 
     private fun addCalendarButton(calendar: List<CalendarListEntry>) {
         calendar.forEach {
@@ -71,7 +72,7 @@ class CalendarListFragment : DaggerFragment() {
 
     private fun createButton(calendar: CalendarListEntry): Button {
         val button = Button(requireContext())
-        button.text=calendar.summary
+        button.text = calendar.summary
         button.setOnClickListener {
             moveToCalendarFragment(calendar.id)
         }
@@ -80,16 +81,16 @@ class CalendarListFragment : DaggerFragment() {
 
     private fun moveToCalendarFragment(calendarId: String) {
         CalendarListFragmentDirections.actionCalendarListToEventList().apply {
-            this.calendarId=calendarId
+            this.calendarId = calendarId
             findNavController().navigate(this)
         }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (resultCode ==Activity.RESULT_OK)
-            when(requestCode){
-                RC_AUTH_PERMISSION->{
+        if (resultCode == Activity.RESULT_OK)
+            when (requestCode) {
+                RC_AUTH_PERMISSION -> {
                     getCalendars()
                 }
             }
@@ -97,7 +98,8 @@ class CalendarListFragment : DaggerFragment() {
 
     override fun onDestroy() {
         super.onDestroy()
-        compositeDisposable.dispose()
+        if (!compositeDisposable.isDisposed)
+            compositeDisposable.dispose()
     }
 
 
