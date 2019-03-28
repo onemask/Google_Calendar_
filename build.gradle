@@ -29,7 +29,7 @@ buildscript {
                             dagger             : '2.21',
 
                             //rxandroid
-                            rxandroid          : '2.1.0',
+                            rxandroid          : '2.1.1',
                             rxjava             : '2.2.5',
                             rxbinding          : '2.1.1',
         ]
