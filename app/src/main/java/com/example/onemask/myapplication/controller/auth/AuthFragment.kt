@@ -53,11 +53,6 @@ class AuthFragment : DaggerFragment() {
 
     }
 
-    private fun initTimber() {
-        Timber.plant(Timber.DebugTree())
-
-    }
-
     private fun makeGoogleSignIn(){
         gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_GAMES_SIGN_IN)
             .requestEmail()
