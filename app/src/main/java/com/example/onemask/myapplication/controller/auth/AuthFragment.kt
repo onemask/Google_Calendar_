@@ -18,6 +18,7 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleCredential
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential
 import dagger.android.support.DaggerFragment
 import kotlinx.android.synthetic.main.fragment_auth.*
+import timber.log.Timber
 import javax.inject.Inject
 
 
@@ -44,11 +45,16 @@ class AuthFragment : DaggerFragment() {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         makeGoogleSignIn()
-
+        initTimber()
         //Delete Easypermission
         button_auth.setOnClickListener {
             startActivityForResult(googleAccountCredential.newChooseAccountIntent(), REQUEST_ACCOUNT_PICKER)
         }
+
+    }
+
+    private fun initTimber() {
+        Timber.plant(Timber.DebugTree())
 
     }
 

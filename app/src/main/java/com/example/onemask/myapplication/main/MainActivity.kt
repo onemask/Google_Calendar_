@@ -11,6 +11,7 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import com.example.onemask.myapplication.R
 import dagger.android.support.DaggerAppCompatActivity
 import kotlinx.android.synthetic.main.activity_main.*
+import timber.log.Timber
 
 class MainActivity : DaggerAppCompatActivity(){
     private lateinit var appBarConfiguration: AppBarConfiguration
@@ -19,10 +20,16 @@ class MainActivity : DaggerAppCompatActivity(){
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
 
+        initTimber()
+
         val navHost : NavHostFragment = host_fragment as? NavHostFragment ?:return
         val navController = navHost.navController
         appBarConfiguration = AppBarConfiguration(navController.graph)
         setupActionBarWithNavController(navController,appBarConfiguration)
+    }
+
+    private fun initTimber() {
+        Timber.plant(Timber.DebugTree())
     }
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {

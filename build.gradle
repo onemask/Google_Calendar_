@@ -32,6 +32,9 @@ buildscript {
                             rxandroid          : '2.1.1',
                             rxjava             : '2.2.5',
                             rxbinding          : '2.1.1',
+
+                            //Timber
+                            timber              :'4.7.1'
         ]
     }
     repositories {
