@@ -3,11 +3,13 @@ package com.example.onemask.myapplication.controller.auth
 import android.accounts.AccountManager
 import android.app.Activity
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.core.app.ActivityCompat
 import androidx.navigation.fragment.findNavController
 import com.example.onemask.myapplication.R
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -19,17 +21,19 @@ import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccoun
 import dagger.android.support.DaggerFragment
 import kotlinx.android.synthetic.main.fragment_auth.*
 import timber.log.Timber
+import java.util.jar.Manifest
 import javax.inject.Inject
 
 
 private const val REQUEST_ACCOUNT_PICKER = 1002
-
+private const val RP_GET_ACCOUNTS = 1003
 
 class AuthFragment : DaggerFragment() {
 
     lateinit var gso : GoogleSignInOptions
     lateinit var mGoogleSignInClient: GoogleSignInClient
     lateinit var googleCredential : GoogleCredential
+
 
     @Inject
     lateinit var googleAccountCredential: GoogleAccountCredential
@@ -42,24 +46,55 @@ class AuthFragment : DaggerFragment() {
         return inflater.inflate(R.layout.fragment_auth, container, false)
     }
 
+
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         makeGoogleSignIn()
 
         //Delete Easypermission
         button_auth.setOnClickListener {
-            startActivityForResult(googleAccountCredential.newChooseAccountIntent(), REQUEST_ACCOUNT_PICKER)
+            selectAccount()
         }
 
     }
 
-    private fun makeGoogleSignIn(){
+    private fun selectAccount() {
+        val permission = android.Manifest.permission.GET_ACCOUNTS
+        if(ActivityCompat.checkSelfPermission(requireContext(), permission) ==
+            PackageManager.PERMISSION_GRANTED) {
+            startActivityForResult(googleAccountCredential.newChooseAccountIntent(), REQUEST_ACCOUNT_PICKER)
+        }
+        else
+            requestPermissions(arrayOf(permission),RP_GET_ACCOUNTS)
+    }
+
+
+    //permission 적용 하기
+
+   /* val accountPermission = Manifest.permission.GET_ACCOUNTS
+    if (ActivityCompat.checkSelfPermission(
+    requireContext(),
+    accountPermission
+    ) == PackageManager.PERMISSION_GRANTED
+    ) {
+        showAccountPicker()
+*/
+
+        private fun makeGoogleSignIn(){
         gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_GAMES_SIGN_IN)
             .requestEmail()
             .build()
 
         // Build a GoogleSignInClient with the options specified by gso.
         mGoogleSignInClient =GoogleSignIn.getClient(this.context!!.applicationContext,gso)
+    }
+
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        /*when(requestCode){
+            RP_GET
+        }*/
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
