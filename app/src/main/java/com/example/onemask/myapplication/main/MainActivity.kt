@@ -19,9 +19,7 @@ class MainActivity : DaggerAppCompatActivity(){
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
-
         initTimber()
-
         val navHost : NavHostFragment = host_fragment as? NavHostFragment ?:return
         val navController = navHost.navController
         appBarConfiguration = AppBarConfiguration(navController.graph)
